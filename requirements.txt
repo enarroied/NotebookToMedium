@@ -1,0 +1,5 @@
+beautifulsoup4
+jupytext
+markdown
+nbformat
+requests
