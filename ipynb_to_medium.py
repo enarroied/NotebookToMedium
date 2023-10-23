@@ -36,7 +36,12 @@ class NotebookToMedium:
             output_file.write(markdown_text)
 
     def convert_markdown_to_html(
-        self, input_markdown, output_html, nest_as_medium=True, transform_pre_code=True
+        self,
+        input_markdown,
+        output_html,
+        nest_as_medium=True,
+        transform_pre_code=True,
+        add_title_to_pictures=True,
     ):
         """
         Convert a Markdown file to HTML and save it to a file.
@@ -56,6 +61,9 @@ class NotebookToMedium:
 
         if transform_pre_code:
             html_text = self.transform_pre_code(html_text)
+
+        if add_title_to_pictures:
+            html_text = self.add_title_to_pictures(html_text)
 
         with open(output_html, "w", encoding="utf-8") as output_file:
             output_file.write(html_text)
@@ -140,6 +148,37 @@ class NotebookToMedium:
                 pre["class"] = "graf--preV2"
 
         return str(soup.prettify())
+
+    def add_title_to_pictures(self, input_string):
+        """
+        Add captions to images with titles in the input HTML.
+
+        This function searches for <img> elements with a "title" attribute in the input HTML string
+        and adds extra tags to transform them into figures with captions. The title attribute is used
+        as the caption text.
+
+        Args:
+            input_string (str): The input HTML string containing <img> elements.
+
+        Returns:
+            str: The HTML string with captions added to images with titles.
+        """
+        soup = BeautifulSoup(input_string, "html.parser")
+        for img in soup.find_all("img"):
+            title = img.get("title")
+            if title:
+                replace_string = (
+                    '<figure tabindex="0" contenteditable="false" data-testid="editorImageParagraph" class="graf graf--figure graf-after--h4">'
+                    + '<div class="aspectRatioPlaceholder">'
+                    + str(img)
+                    + "</div>"
+                    + f'<figcaption class="imageCaption" contenteditable="true" data-default-value="Type caption for image (optional)">{title}<br></figcaption>'
+                    + " </figure>"
+                )
+                img.replace_with(replace_string)
+        result = str(soup.prettify())
+        result = html.unescape(result)
+        return result
 
     def push_to_medium(
         self,
