@@ -54,6 +54,8 @@ class NotebookToMedium:
         with open(input_markdown, "r", encoding="utf-8") as markdown_file:
             markdown_text = markdown_file.read()
 
+        markdown_text = self.escape_html_tags(markdown_text)
+
         html_text = self.md.convert(markdown_text)
 
         if nest_as_medium:
@@ -91,6 +93,39 @@ class NotebookToMedium:
 
         # Remove the temporary Markdown file
         os.remove(temp_markdown)
+
+    def escape_html_tags(self, text):
+        """
+        Escape HTML tags within the input text with HTML-like spans for highlighting.
+
+        This function searches for valid HTML tags in the input text using a regular expression pattern,
+        and replaces them with HTML-like spans to visually highlight the tags in the text.
+
+        Args:
+            text (str): The input text containing HTML tags.
+
+        Returns:
+            str: The input text with HTML tags replaced by spans for highlighting.
+        """
+        # Regular expression pattern to match valid HTML tags
+        html_tags_pattern = r"<\/?[a-z][^>]*>|&[a-zA-Z]+;"
+
+        # Use re.findall to find all HTML tags in the input text
+        html_tags = re.findall(html_tags_pattern, text)
+
+        # Remove duplicates and create a list of distinct tags
+        html_distinct_tags = list(set(html_tags))
+
+        for tag in html_distinct_tags:
+            # Replace each tag with an HTML-like span for escaîng
+            replace_tag = tag.replace("<", '<<span class="hljs-selector-tag">')
+            end_tag_position = replace_tag.find(">", replace_tag.find(">", 0) + 1)
+            end_tag = replace_tag[end_tag_position:].replace(">", "</span>>")
+
+            replace_tag = replace_tag[:end_tag_position] + end_tag
+            text = text.replace(tag, replace_tag)
+
+        return text
 
     def transform_nested_ul_to_medium_nested_list(self, input_string):
         """
@@ -139,9 +174,10 @@ class NotebookToMedium:
             if code:
                 language_list = code.get("class")
                 language = ""
-                for item in language_list:
-                    if "language-" in item:
-                        language = item.replace("language-", "")
+                if language_list:
+                    for item in language_list:
+                        if "language-" in item:
+                            language = item.replace("language-", "")
                 pre["data-code-block-lang"] = language
                 pre["data-code-block-mode"] = "2"
                 pre["spellcheck"] = "false"
