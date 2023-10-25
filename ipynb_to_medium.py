@@ -234,6 +234,9 @@ class NotebookToMedium:
             id (str): User ID for Medium.
             token (str): Medium API token.
         """
+        if len(tag_list) > 5:
+            raise ValueError("Tag list should not contain more than 5 elements.")
+
         with open(file_to_upload, "r") as content_text:
             content = content_text.read()
 
