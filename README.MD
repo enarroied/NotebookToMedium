@@ -1,3 +1,5 @@
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 # NotebookToMedium
 
 NotebookToMedium is a Python class that allows you to convert Jupyter notebooks (.ipynb) or Markdown files (.md) to HTML and then push the resulting HTML content to Medium as a draft post. This is a convenient way to publish your Jupyter notebooks or Markdown documents on Medium.
