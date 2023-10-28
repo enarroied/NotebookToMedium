@@ -54,18 +54,20 @@ class NotebookToMedium:
         with open(input_markdown, "r", encoding="utf-8") as markdown_file:
             markdown_text = markdown_file.read()
 
-        markdown_text = self.escape_html_tags(markdown_text)
+        markdown_text = html.escape(markdown_text)
 
         html_text = self.md.convert(markdown_text)
-
-        if nest_as_medium:
-            html_text = self.transform_nested_ul_to_medium_nested_list(html_text)
 
         if transform_pre_code:
             html_text = self.transform_pre_code(html_text)
 
+        if nest_as_medium:
+            html_text = self.transform_nested_ul_to_medium_nested_list(html_text)
+
         if add_title_to_pictures:
             html_text = self.add_title_to_pictures(html_text)
+
+        html_text = html.unescape(html_text)
 
         with open(output_html, "w", encoding="utf-8") as output_file:
             output_file.write(html_text)
@@ -94,39 +96,6 @@ class NotebookToMedium:
         # Remove the temporary Markdown file
         os.remove(temp_markdown)
 
-    def escape_html_tags(self, text):
-        """
-        Escape HTML tags within the input text with HTML-like spans for highlighting.
-
-        This function searches for valid HTML tags in the input text using a regular expression pattern,
-        and replaces them with HTML-like spans to visually highlight the tags in the text.
-
-        Args:
-            text (str): The input text containing HTML tags.
-
-        Returns:
-            str: The input text with HTML tags replaced by spans for highlighting.
-        """
-        # Regular expression pattern to match valid HTML tags
-        html_tags_pattern = r"<\/?[a-z][^>]*>|&[a-zA-Z]+;"
-
-        # Use re.findall to find all HTML tags in the input text
-        html_tags = re.findall(html_tags_pattern, text)
-
-        # Remove duplicates and create a list of distinct tags
-        html_distinct_tags = list(set(html_tags))
-
-        for tag in html_distinct_tags:
-            # Replace each tag with an HTML-like span for escaîng
-            replace_tag = tag.replace("<", '<<span class="hljs-selector-tag">')
-            end_tag_position = replace_tag.find(">", replace_tag.find(">", 0) + 1)
-            end_tag = replace_tag[end_tag_position:].replace(">", "</span>>")
-
-            replace_tag = replace_tag[:end_tag_position] + end_tag
-            text = text.replace(tag, replace_tag)
-
-        return text
-
     def transform_nested_ul_to_medium_nested_list(self, input_string):
         """
         Transform nested <ul> and <li> tags to a medium.com-friendly format.
@@ -141,7 +110,7 @@ class NotebookToMedium:
         """
         soup = BeautifulSoup(input_string, "html.parser")
 
-        # Find and replace NESTED <ul> and its <li> tags
+        # Find and replace NESTED <ul> tags and its <li> tags for Medium
         for ul1 in soup.find_all("ul"):
             for ul2 in ul1.find_all("ul"):
                 replace_string = " ".join(str(item) for item in ul2.contents)
@@ -151,7 +120,6 @@ class NotebookToMedium:
                 ul2.replace_with(replace_string)
 
         result = str(soup.prettify())
-        result = html.unescape(result)
         return result
 
     def transform_pre_code(self, input_string):
@@ -182,6 +150,13 @@ class NotebookToMedium:
                 pre["data-code-block-mode"] = "2"
                 pre["spellcheck"] = "false"
                 pre["class"] = "graf--preV2"
+                pre["data-testid"] = "editorCodeBlockParagraph"
+
+                span_tag = soup.new_tag("span")
+                span_tag["class"] = "pre--content"
+                content = "".join(map(str, code.contents))
+                span_tag.string = content
+                code.replace_with(span_tag)
 
         return str(soup.prettify())
 
@@ -189,8 +164,9 @@ class NotebookToMedium:
         """
         Add captions to images with titles in the input HTML.
 
-        This function searches for <img> elements with a "title" attribute in the input HTML string
-        and adds extra tags to transform them into figures with captions. The title attribute is used
+        This function searches for <img> elements with a "title" attribute or with a quoted " "
+        string in the URL (which comes from the Markdown) in the input HTML string and adds extra
+        tags to transform them into figures with captions. The title attribute is used
         as the caption text.
 
         Args:
@@ -202,18 +178,25 @@ class NotebookToMedium:
         soup = BeautifulSoup(input_string, "html.parser")
         for img in soup.find_all("img"):
             title = img.get("title")
-            if title:
+            if not title:
+                src = img.get("src")
+                if '"' in src:
+                    title = src.split('"')[1]
+                else:
+                    title = ""
+            if title != "":
                 replace_string = (
                     '<figure tabindex="0" contenteditable="false" data-testid="editorImageParagraph" class="graf graf--figure graf-after--h4">'
                     + '<div class="aspectRatioPlaceholder">'
                     + str(img)
+                    .replace(title, "")
+                    .replace('"', "")  # we don't want the title in the URL
                     + "</div>"
                     + f'<figcaption class="imageCaption" contenteditable="true" data-default-value="Type caption for image (optional)">{title}<br></figcaption>'
                     + " </figure>"
                 )
                 img.replace_with(replace_string)
         result = str(soup.prettify())
-        result = html.unescape(result)
         return result
 
     def push_to_medium(
