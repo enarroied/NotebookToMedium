@@ -220,7 +220,7 @@ class NotebookToMedium:
         if len(tag_list) > 5:
             raise ValueError("Tag list should not contain more than 5 elements.")
 
-        with open(file_to_upload, "r") as content_text:
+        with open(file_to_upload, "r", encoding="utf-8") as content_text:
             content = content_text.read()
 
         url = f"https://api.medium.com/v1/users/{medium_id}/posts"
