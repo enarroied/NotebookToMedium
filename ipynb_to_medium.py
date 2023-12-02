@@ -16,11 +16,11 @@ class NotebookToMedium:
 
     def convert_notebook_to_markdown(self, input_notebook, output_markdown):
         """
-        Convert a Markdown file to HTML and save it to a file.
+         Convert a Jupyter notebook to Markdown and save it to a file.
 
         Args:
-            input_markdown (str): Path to the input Markdown file.
-            output_html (str): Path to the output HTML file.
+            input_notebook (str): Path to the input Jupyter notebook.
+            output_markdown (str): Path to the output Markdown file.
         """
         with open(input_notebook, "r", encoding="utf-8") as notebook_file:
             notebook = read(notebook_file, as_version=4)
