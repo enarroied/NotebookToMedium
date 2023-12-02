@@ -213,9 +213,12 @@ class NotebookToMedium:
         Push an HTML file to Medium as a draft post.
 
         Args:
-            file_to_upload (str): Path to the HTML file to be uploaded.
-            id (str): User ID for Medium.
+            input_file (str): Path to the .ipynb or .md file to be uploaded.
+            medium_id (str): User ID for Medium.
             token (str): Medium API token.
+            title (str): Title for the Medium post.
+            tag_list (list): List of tags for the Medium post.
+            publish_status (str, optional): Publish status (default: 'draft').
         """
         if len(tag_list) > 5:
             raise ValueError("Tag list should not contain more than 5 elements.")
