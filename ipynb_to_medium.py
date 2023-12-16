@@ -11,6 +11,10 @@ from nbformat import read
 
 
 class NotebookToMedium:
+    """
+    Write your Medium articles in a Jupyter Notebook and push it directly to Medium using the Medium API.
+    """
+
     def __init__(self):
         self.md = markdown.Markdown(extensions=[fenced_code.FencedCodeExtension()])
 
@@ -98,12 +102,12 @@ class NotebookToMedium:
 
     def transform_nested_ul_to_medium_nested_list(self, input_string):
         """
-        Transform nested <ul> and <li> tags to a medium.com-friendly format.
+        Transform nested `<ul>` and `<li>` tags to a medium.com-friendly format.
 
-        Replaces nested <ul> tags with <br> and <li> tags with '- ' to format them as medium.com lists.
+        Replaces nested `<ul>` tags with <br> and `<li>` tags with '-' to format them as medium.com lists.
 
         Args:
-            input_string (str): The input HTML string containing nested <ul> and <li> tags.
+            input_string (str): The input HTML string containing nested `<ul>` and `<li>` tags.
 
         Returns:
             str: The transformed HTML string.
@@ -124,17 +128,17 @@ class NotebookToMedium:
 
     def transform_pre_code(self, input_string):
         """
-        Transform <pre> elements with <code> tags inside.
+        Transform `<pre>` elements with `<code>` tags inside.
 
-        This function takes an HTML string as input, searches for <pre> elements that contain <code> tags,
-        extracts the programming language from the <code> tag's class attribute, and transforms the <pre> element
+        This function takes an HTML string as input, searches for `<pre>` elements that contain `<code>` tags,
+        extracts the programming language from the `<code>` tag's class attribute, and transforms the `<pre>` element
         with new attributes for Medium.com-friendly code blocks.
 
         Args:
             input_string (str): The input HTML string.
 
         Returns:
-            str: The transformed HTML string with updated attributes for <pre> elements.
+            str: The transformed HTML string with updated attributes for `<pre>` elements.
         """
         soup = BeautifulSoup(input_string, "html.parser")
         for pre in soup.find_all("pre"):
@@ -164,13 +168,13 @@ class NotebookToMedium:
         """
         Add captions to images with titles in the input HTML.
 
-        This function searches for <img> elements with a "title" attribute or with a quoted " "
+        This function searches for `<img>` elements with a "title" attribute or with a quoted " "
         string in the URL (which comes from the Markdown) in the input HTML string and adds extra
         tags to transform them into figures with captions. The title attribute is used
         as the caption text.
 
         Args:
-            input_string (str): The input HTML string containing <img> elements.
+            input_string (str): The input HTML string containing `<img>` elements.
 
         Returns:
             str: The HTML string with captions added to images with titles.
@@ -258,7 +262,7 @@ class NotebookToMedium:
         self, input_file, medium_id, token, title, tag_list, publish_status="draft"
     ):
         """
-        Convert an .ipynb or .md file to HTML and push to Medium as a draft post.
+        Convert an `.ipynb` or `.md` file to HTML and push to Medium as a draft post.
 
         Args:
             input_file (str): Path to the .ipynb or .md file to be uploaded.
