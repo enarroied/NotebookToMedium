@@ -102,12 +102,12 @@ class NotebookToMedium:
 
     def transform_nested_ul_to_medium_nested_list(self, input_string):
         """
-        Transform nested `<ul>` and `<li>` tags to a medium.com-friendly format.
+        Transform nested ```<ul>``` and ```<li>``` tags to a medium.com-friendly format.
 
-        Replaces nested `<ul>` tags with <br> and `<li>` tags with '-' to format them as medium.com lists.
+        Replaces nested ```<ul>``` tags with ```<br>``` and ```<li>``` tags with '-' to format them as medium.com lists.
 
         Args:
-            input_string (str): The input HTML string containing nested `<ul>` and `<li>` tags.
+            input_string (str): The input HTML string containing nested ```<ul>``` and ```<li>``` tags.
 
         Returns:
             str: The transformed HTML string.
@@ -128,7 +128,7 @@ class NotebookToMedium:
 
     def transform_pre_code(self, input_string):
         """
-        Transform `<pre>` elements with `<code>` tags inside.
+        Transform ```<pre>``` elements with ```<code>``` tags inside.
 
         This function takes an HTML string as input, searches for `<pre>` elements that contain `<code>` tags,
         extracts the programming language from the `<code>` tag's class attribute, and transforms the `<pre>` element
